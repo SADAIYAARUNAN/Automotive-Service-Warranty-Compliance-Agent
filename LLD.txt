@@ -1,0 +1,17 @@
+Low - Level Design (LLD)
+
+The LLD defines the strict data structures and deterministic node logic required for production reliability.
+
+
+1. State Schema (AgentState)
+
+   The state is managed via a Pydantic BaseModel to ensure type safety throughout the graph execution.
+
+   StateField                    DataType                         Purpose
+
+1. messages                      list[BaseMessages]               CoreLangGraph History(Automatically appended)
+2. raw_service_report            str                              The unedited customer service report
+3. sanitized_report              str                              The text after Presidion Redaction
+4. retrieved_warranty_policies   list[Dict]                       The Context injected from Qdrant Hybrid Search
+5. warrant_claim_assessment      str                              The final output staructured by the LLM
+6. error_count                   int                              Tracks consecutive API or tool failures for circuit-breaking

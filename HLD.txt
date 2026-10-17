@@ -1,0 +1,26 @@
+High-Level Design (HLD)
+
+Automotive Service & Warranty Compliance Agent (ASWCA) is designed as an asynchronous API Service , wrapping a stateful AI Agent. It processes incoming customer service logs
+for sensitive information - PII (names, phone numbers, home addresses) and Vehicle Identifiers (VINs). Cross - references warranty claims against Manufacturer Warranty Policies 
+and Technical Service Bulletins (TSBs) to determine if a repair is covered under warranty or if it violates compliance guidelines (e.g., unauthorized modifications or user-induced damage).
+
+
+Core System Components : 
+
+API Layer (FastAPI): 
+Exposes asynchronous endpoints to trigger the agent workflow and handle human-in-the-loop callback approvals, aligning with backend integration requirements.
+
+Agent Orchestrator (LangGraph): 
+Manages the cyclic workflow, tool execution, and thread state management.
+
+Sanitization Engine (Presidio): 
+Executes locally to scrub personally identifiable information (PII) before any external API calls are made, enforcing responsible data-handling practices. 
+It utilizes Presidio's AnalyzerEngine and PatternRecognizer context-aware redaction.
+
+
+State Persistence (SQLite): 
+A LangGraph checkpointer that serializes and saves the StateGraph at every node transition to allow for human review interrupts and failure recovery.
+
+
+
+
