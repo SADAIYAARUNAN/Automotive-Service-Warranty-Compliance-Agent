@@ -3,15 +3,106 @@ Low - Level Design (LLD)
 The LLD defines the strict data structures and deterministic node logic required for production reliability.
 
 
-1. State Schema (AgentState)
+1. State Schema (AgentState) :
+   -------------------------
 
    The state is managed via a Pydantic BaseModel to ensure type safety throughout the graph execution.
 
-   StateField                    DataType                         Purpose
+     StateField                    DataType                         Purpose
+     ----------                    --------                         -------
 
-1. messages                      list[BaseMessages]               CoreLangGraph History(Automatically appended)
-2. raw_service_report            str                              The unedited customer service report
-3. sanitized_report              str                              The text after Presidion Redaction
-4. retrieved_warranty_policies   list[Dict]                       The Context injected from Qdrant Hybrid Search
-5. warrant_claim_assessment      str                              The final output staructured by the LLM
-6. error_count                   int                              Tracks consecutive API or tool failures for circuit-breaking
+   1. messages                      list[BaseMessages]               CoreLangGraph History(Automatically appended)
+   2. raw_service_report            str                              The unedited customer service report
+   3. sanitized_report              str                              The text after Presidion Redaction
+   4. retrieved_warranty_policies   list[Dict]                       The Context injected from Qdrant Hybrid Search
+   5. warrant_claim_assessment      str                              The final output staructured by the LLM
+   6. error_count                   int                              Tracks consecutive API or tool failures for circuit-breaking
+
+
+2 . Node definitions : 
+    ----------------
+
+    Node Name                     processing logic
+    ---------                     ----------------
+
+    sanitize_data                 Parses raw_service_report using Presidio. Masks names, locations,
+                                  and VINs. Validates edge cases and updates sanitized_report.
+
+                        
+   query_compliance_db            Formats a search query based on the sanitized issue. Retrieve matching 
+                                  regulatory documents from Qdrant. Updates retrieved_warranty_policies.
+
+
+   claim_assessment               Injects sanitized_report and retrieved_warranty_policies in to a structured \
+                                  prompt. Calls a hosted LLM to generate the warrant_claim_assessment.
+
+
+   error_fallback                 Triggered by conditional routing if toll calls time out.
+                                  Increments error_count. If error_count < 3 ,
+                                  requests a retry . If >=3 , halts execution gracefully.
+
+
+
+3. WorlFlow Routing : 
+   ----------------
+
+   1. Entry Point         : Starts at sanitize_data.
+   2. Standard Flow       : sanitize_data -> query_compliance_db -> claim_assessment.
+   3. Conditional Routing : Post - query_compliance_db, if an exception is caught , route to
+                            error_fallback. error_fallback routes back to query_compliance_db or END
+                            based on error_count.
+   4. Interrupt Boundary  : Post - claim_assessment , the checkpoint pauses the graph. A user must hit
+                           a specifc API endpoint tp approve the claim_assessment , befor the graph
+                            routes to END.
+
+
+
+4. MOCK DATA STRUCTURE : 
+   -------------------
+
+   1. Input Data (RAW Vehicle Report Log) : 
+
+      Payload hitting FastAPI endpoint.
+
+      {
+        "raw_telemetry": "Service Ticket #SRV-99421-EU. Customer Sarah Van Dijk dropped off her vehicle at Amsterdam Central Motors located at Keizersgracht 424, 1016 GC Amsterdam. Contact phone: +31-20-555-0199. Vehicle VIN: WBA5SER7890123456, License Plate: 45-HZ-KJ. Customer complaint: Infotainment screen went completely blank during driving. Mechanic initial notes: Technician inspected the dashboard wiring harness and discovered aftermarket third-party amplifier spliced directly into the main CAN bus data lines. Customer stated an independent garage installed custom audio equipment last month. Requesting full warranty coverage replacement for the central display unit and infotainment module.",
+        "thread_id": "warranty-claim-001"
+      }
+
+
+
+5. Qdrant Knowledge base : 
+   ---------------------
+
+   The chunked metadata stored in your Qdrant vector database. When a hybrid search is executed, it retreives claims based on the sanitize_data. 
+
+   [
+     {
+      "id": 1,
+      "policy_id": "WARRANTY-MOD-01",
+      "category": "Modifications & Alterations",
+      "content": "Any electrical or software modifications to the CAN bus network or main wiring harness by unauthorized third-party workshops immediately voids warranty coverage for infotainment and electronic control units.",
+      "access_level": "Tier-1",
+      "severity": "Critical"
+     },
+     {
+      "id": 2,
+      "policy_id": "TSB-INF-EU-04",
+      "category": "Hardware Defects",
+      "content": "Standard factory-defect display failures are fully covered under the 3-year European manufacturer warranty, provided no physical tampering or liquid ingress is detected.",
+      "access_level": "Tier-1",
+      "severity": "Medium"
+     },
+     {
+      "id": 3,
+      "policy_id": "INTERNAL-PRICING-SENSITIVE",
+      "category": "Internal Labor Rates",
+      "content": "Dealership internal warranty reimbursement labor rates are fixed at €85/hour for Tier-1 certified technicians.",
+      "access_level": "Restricted-Admin",
+      "severity": "Low"
+     }
+   ]
+      
+
+
+
