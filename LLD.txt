@@ -29,15 +29,15 @@ The LLD defines the strict data structures and deterministic node logic required
                                   and VINs. Validates edge cases and updates sanitized_report.
 
                         
-   query_compliance_db            Formats a search query based on the sanitized issue. Retrieve matching 
+    query_compliance_db            Formats a search query based on the sanitized issue. Retrieve matching 
                                   regulatory documents from Qdrant. Updates retrieved_warranty_policies.
 
 
-   claim_assessment               Injects sanitized_report and retrieved_warranty_policies in to a structured \
+    claim_assessment               Injects sanitized_report and retrieved_warranty_policies in to a structured \
                                   prompt. Calls a hosted LLM to generate the warrant_claim_assessment.
 
 
-   error_fallback                 Triggered by conditional routing if toll calls time out.
+    error_fallback                 Triggered by conditional routing if toll calls time out.
                                   Increments error_count. If error_count < 3 ,
                                   requests a retry . If >=3 , halts execution gracefully.
 
