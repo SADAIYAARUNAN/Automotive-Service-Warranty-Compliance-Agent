@@ -198,7 +198,7 @@ def query_compliance_db(state: AgentState) -> Dict[str, Any]:
         ]
 
 
-        return {"retreived_policies":claims}
+        return {"retrieved_warranty_policies":claims}
 
 
     except Exception as e:
@@ -223,8 +223,8 @@ if __name__ == "__main__":
 
     output = query_compliance_db(mock_data)
 
-    print(f"\n--- Retrieved Policies (count: {len(output['retreived_policies'])})---")
-    for idx, doc in enumerate(output['retreived_policies'], start=1):
+    print(f"\n--- Retrieved Policies (count: {len(output['retrieved_warranty_policies'])})---")
+    for idx, doc in enumerate(output['retrieved_warranty_policies'], start=1):
         print(f"\n{idx}. [{doc['policy_id']}] (Severity: {doc['severity']} | Score: {doc['score']})")
         print(f"  Category: {doc['category']}")
         print(f" Rule: {doc['content']}")

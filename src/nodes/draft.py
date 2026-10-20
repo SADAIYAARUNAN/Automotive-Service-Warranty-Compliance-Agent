@@ -8,6 +8,7 @@ from src.state import AgentState
 
 
 load_dotenv()
+
 api_key = os.getenv("OPENAI_API_KEY")
 llm=ChatOpenAI(
     model="gpt-4o-mini",
@@ -28,7 +29,7 @@ def claim_assessment(state: AgentState) -> Dict[str, Any]:
 
     if not sanitized_text:
         return{
-            "risk_summary": "Error: No Sanitized data available for assessment."
+            "warrant_claim_assessment": "Error: No Sanitized data available for assessment."
         }
 
     formatted_policies = "\n".join(
@@ -65,12 +66,12 @@ def claim_assessment(state: AgentState) -> Dict[str, Any]:
             ]
         )
         return{
-            "risk_summary":response.content,
+            "warrant_claim_assessment":response.content,
             "message": [response]
         }
     except Exception as e:
         print(f"[ERROR] LLM generation Failed: {e}")
         return{
-            "risk_summary": f"failed to generate assessment due to API error: {e}",
+            "warrant_claim_assessment": f"failed to generate assessment due to API error: {e}",
             "error_count": state.error_count
         }

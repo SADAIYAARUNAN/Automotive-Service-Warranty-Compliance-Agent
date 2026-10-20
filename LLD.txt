@@ -65,7 +65,7 @@ The LLD defines the strict data structures and deterministic node logic required
       Payload hitting FastAPI endpoint.
 
       {
-        "raw_telemetry": "Service Ticket #SRV-99421-EU. Customer Sarah Van Dijk dropped off her vehicle at Amsterdam Central Motors located at Keizersgracht 424, 1016 GC Amsterdam. Contact phone: +31-20-555-0199. Vehicle VIN: WBA5SER7890123456, License Plate: 45-HZ-KJ. Customer complaint: Infotainment screen went completely blank during driving. Mechanic initial notes: Technician inspected the dashboard wiring harness and discovered aftermarket third-party amplifier spliced directly into the main CAN bus data lines. Customer stated an independent garage installed custom audio equipment last month. Requesting full warranty coverage replacement for the central display unit and infotainment module.",
+        "raw_service_report": "Service Ticket #SRV-99421-EU. Customer Sarah Van Dijk dropped off her vehicle at Amsterdam Central Motors located at Keizersgracht 424, 1016 GC Amsterdam. Contact phone: +31-20-555-0199. Vehicle VIN: WBA5SER7890123456, License Plate: 45-HZ-KJ. Customer complaint: Infotainment screen went completely blank during driving. Mechanic initial notes: Technician inspected the dashboard wiring harness and discovered aftermarket third-party amplifier spliced directly into the main CAN bus data lines. Customer stated an independent garage installed custom audio equipment last month. Requesting full warranty coverage replacement for the central display unit and infotainment module.",
         "thread_id": "warranty-claim-001"
       }
 
@@ -85,7 +85,7 @@ The LLD defines the strict data structures and deterministic node logic required
       "access_level": "Tier-1",
       "severity": "Critical"
      },
-     {
+     {  
       "id": 2,
       "policy_id": "TSB-INF-EU-04",
       "category": "Hardware Defects",

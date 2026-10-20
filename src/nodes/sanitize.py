@@ -40,7 +40,7 @@ def sanitize_data(state: AgentState) -> Dict[str, Any]:
     raw_data = state.raw_service_report
 
     if not raw_data:
-        return{"sanitized_data": "No raw data provided."}
+        return{"sanitized_report": "No raw data provided."}
 
 
 
@@ -66,7 +66,7 @@ def sanitize_data(state: AgentState) -> Dict[str, Any]:
     )
 
     # Return the updated state
-    return {"sanitized_data": anonymized_result.text}
+    return {"sanitized_report": anonymized_result.text}
 
 
 if __name__ == "__main__":
@@ -88,4 +88,4 @@ if __name__ == "__main__":
     print("RAW DATA")
     print(mock_data.raw_service_report.strip())
     print("\n---Sanitized data---")
-    print(result["sanitized_data"].strip())
+    print(result["sanitized_report"].strip())
