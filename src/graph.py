@@ -3,6 +3,7 @@ from langgraph.graph import StateGraph, END
 from langgraph.checkpoint.sqlite import SqliteSaver
 
 
+from src.nodes import retrieve
 from src.state import AgentState
 from src.nodes.sanitize import sanitize_data
 from src.nodes.retrieve import query_compliance_db
@@ -20,6 +21,37 @@ def error_counting(state: AgentState) -> str:
     return "continue"
 
 
+def error_fallback(state: AgentState) -> dict:
+    """
+    Triggered by conditional routing if tool calls time out or fail.
+    Logs the error and prepares for retyr or graceful shutdown.
+    """
+    print(f"[WARN] Error threshold check. Current count: {state.error_count}")
+    return{}
+
+
+def route_post_retrieve(state: AgentState) -> str:
+    """
+    Evaluates the state after retrieval.
+    Routes to fallback on error, END on Critical failure, or draft on success.
+    """
+    if state.error_count >= 3:
+        return "end"
+    elif state.error_count > 0:
+        return "fallback"
+    return "draft"
+
+
+def routre_post_fallback(state: AgentState) -> dict:
+    """
+    Routes back to the retrieval node to retry.
+    """
+    if state.error_count >=3:
+        return "end"
+    return "retrieve"
+
+
+
 # Initilaize Graph
 workflow  = StateGraph(AgentState)
 
@@ -27,13 +59,30 @@ workflow  = StateGraph(AgentState)
 # Add Nodes
 workflow.add_node("sanitize", sanitize_data)
 workflow.add_node("retrieve",query_compliance_db)
+workflow.add_node("fallback",error_fallback)
 workflow.add_node("draft",claim_assessment)
 
 
 # Add Edge Pipeline
 workflow.set_entry_point("sanitize")
 workflow.add_edge("sanitize","retrieve")
-workflow.add_edge("retrieve","draft")
+workflow.add_conditional_edges(
+    "retrieve",
+    route_post_retrieve,
+    {
+        "fallback": "fallback",
+        "end": END,
+        "draft": "draft"
+    }
+)
+workflow.add_conditional_edges(
+    "fallback",
+    routre_post_fallback,
+    {
+        "retrieve": "retrieve",
+        "end": END
+    }
+)
 workflow.add_edge("draft",END)
 
 
@@ -41,7 +90,10 @@ workflow.add_edge("draft",END)
 db_conn = sqlite3.connect("aswca_checkpoints.sqlite", check_same_thread=False)
 memory=SqliteSaver(db_conn)
 
-app = workflow.compile(checkpointer=memory)
+app = workflow.compile(
+    checkpointer=memory,
+    interrupt_after=["draft"]
+)
 
 
 if __name__ == "__main__":

@@ -60,7 +60,7 @@ async def get_thread_state(thread_id: str):
         if not state_snapshot.values:
             return {"thread_id": thread_id,"status":"No active status found."}
         return{
-            "thread_is":thread_id,
+            "thread_id":thread_id,
             "values":state_snapshot.values,
             "next_steps":state_snapshot.next
         }

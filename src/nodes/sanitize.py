@@ -60,7 +60,7 @@ def sanitize_data(state: AgentState) -> Dict[str, Any]:
              "DEFAULT": OperatorConfig("replace", {"new_value": "<REDACTED>"}),
              "PERSON": OperatorConfig("replace", {"new_value": "<PERSON_REDACTED>"}),
              "LOCATION": OperatorConfig("replace", {"new_value": "<LOCATION_REDACTED>"}),
-             "PHONE_NUMBER": OperatorConfig("replace", {"new_value":"<PHONE_REDCATED>"}),
+             "PHONE_NUMBER": OperatorConfig("replace", {"new_value":"<PHONE_REDACTED>"}),
              "VIN": OperatorConfig("replace",{"new_value":"<VIN_REDACTED>"})
         }
     )

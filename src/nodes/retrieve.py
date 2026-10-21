@@ -204,7 +204,7 @@ def query_compliance_db(state: AgentState) -> Dict[str, Any]:
     except Exception as e:
         print(f"[Error] Qdrant retrievel failed: {e}")
         return{
-            "retreived_policies": [],
+            "retrieved_warranty_policies": [],
             "error_count": state.error_count + 1
         }
 

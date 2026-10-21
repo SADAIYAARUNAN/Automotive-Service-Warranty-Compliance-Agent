@@ -48,7 +48,7 @@ def claim_assessment(state: AgentState) -> Dict[str, Any]:
 
 
     === RETRIEVED POLICIES ===
-    {policies}
+    {formatted_policies}
 
     === INSTRUCTIONS ===
     Provide a professional compliance risk assessment containing:
